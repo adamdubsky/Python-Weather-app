@@ -2,6 +2,7 @@
 #program is a weather app written in python 
 #Uses a api key for weather data 
 #using tkinter for the basic gui interface
+#uses a api to get users initial location using geolocation api
 
 #API key
 #03552ea42ae5edc6ded3cf7d466d831b
@@ -10,11 +11,15 @@
 
 key = '499e465aeb174ff88081e39ef599844b'
 url = 'http://api.openweathermap.org/data/2.5/weather?q={}&appid={}'
+current_loc_url = 'http://ipinfo.io/json'
 
 from tkinter import *
 from tkinter import messagebox
 from PIL import ImageTk, Image
 import requests
+import json
+from urllib.request import urlopen
+
 
 
 
@@ -36,6 +41,20 @@ def get_weather(location):
     else:
         return None
 
+def use_current():
+    
+    current_loc_call = requests.get(current_loc_url)
+    curr_location = current_loc_call.json()['city']
+    curr_loc_weather = get_weather(curr_location)
+    if curr_loc_weather:
+        label_location['text'] = '{}, {}'.format(curr_loc_weather[0], curr_loc_weather[1])
+        label_temperature['text'] = '{:.1f}F'.format(curr_loc_weather[2])
+        label_weather['text'] = '{}'.format(curr_loc_weather[3])
+    else:
+        messagebox.showerror('Error', 'City not found')
+
+
+
 #function that takes the user input and feeds through and retrieves data for location
 def search_API():
     city_output = prompt_text.get()
@@ -47,6 +66,7 @@ def search_API():
         #label_feelsLike['text'] = '{:.1f}F'.format(weather[4])
     else:
         messagebox.showerror('Error', 'City not found')
+
 
 
 #GUI 
@@ -69,6 +89,8 @@ prompt_text = StringVar()
 prompt = Entry(screen,textvariable=prompt_text)
 prompt.pack()
 search_button = Button(screen, text='Enter', width = 15, command = search_API)
+use_curr_button = Button(screen, text = 'Use current location', width = 15, command = use_current())
+#use_curr_button.pack()
 search_button.pack()
 
 
